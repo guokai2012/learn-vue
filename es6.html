@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ECMAScript 6学习</title>
+  </head>
+  <body></body>
+
+  <script>
+    // =================== let 变量 ==========================
+    // let 不可重复声明。var支持重复声明
+    let a;
+    let b, c, d;
+    let f = 10,
+      g = "hello",
+      h = true;
+    console.log(a, b, c, d, f, g, h);
+
+    // let是块级作用域，只在代码块里有效
+    {
+      let ba = "10ba"; // let是块级作用域，只在代码块里有效
+      console.log(ba);
+
+      var va = "20va"; // var是函数作用域，在代码块外也可以访问
+      console.log(va);
+    }
+    // console.log(ba); // 报错，ba在代码块外不可访问
+    console.log(va); // 正常输出，va在代码块外可以访问
+
+    // let 不存在变量提升，var存在变量提升
+    // console.log(cb); // 报错，let声明的变量不存在变量提升。即在声明之前访问会报错
+    let cb = 20;
+
+    console.log(ca); // 正常输出，var声明的变量存在变量提升。即在声明之前访问会输出undefined
+    var ca = 30;
+
+    // let 不影响作用域链
+    {
+      let da = "da10";
+      function test() {
+        console.log(da); // 报错，da在函数作用域内不可访问
+      }
+      test();
+    }
+
+    // =================== const 常量 ===================
+    // const 声明的常量必须初始化，且不可修改
+    const pi = 3.14;
+    // pi = 3.14159; // 报错，const声明的常
+
+    // const 声明的常量是块级作用域，只在代码块里有效
+    {
+      const e = 2.718;
+      console.log(e);
+    }
+    // console.log(e); // 报错，e在代码块外不可访问
+
+    // const 默认使用大写字母命名常量
+    const MAX_VALUE = 100;
+
+    // 对于数组和对象，const声明的常量指向的内存地址不可变，但内容可以修改
+    const arr = [1, 2, 3];
+    arr.push(4); // 正常，修改数组内容
+    console.log(arr); // 输出 [1, 2, 3, 4]
+
+    // =================== 解构赋值 ===================
+    // ES6允许按照一定模式从数组和对象中提取值，对变量进行赋值，这被称为解构赋值。
+    // 数组解构赋值
+    const arr2 = [1, 2, 3];
+    let [x, y, z] = arr2; // x=1, y=2, z=3 将数组arr2的值依次赋给变量x, y, z
+    console.log(x, y, z);
+
+    // 对象解构赋值
+    const obj = {
+      name: "Alice",
+      age: 25,
+      work: function () {
+        console.log("working");
+      },
+    };
+    let { name, age } = obj; // name="Alice", age=25 将对象obj的属性值赋给变量name, age
+    console.log(name, age);
+    let { work } = obj; // 将对象obj的work方法赋给变量work
+    work(); // 调用work方法，输出 "working"
+
+    // =================== 模板字符串 ===================
+    // 模板字符串使用反引号（`）包裹，可以包含变量和表达式
+    let name2 = "Bob";
+    let greeting = `Hello, ${name2}!`; // 使用${}语法插入变量
+    console.log(greeting); // 输出 "Hello, Bob!"
+
+    // 模板字符串可以换行
+    let multiLine = `This is a
+    multi-line string.`;
+    console.log(multiLine);
+
+    // =================== 直接写入变量和函数，作为对象的属性和方法 ===================
+    let name3 = "Alice";
+    let greet = function () {
+      console.log(`Hello, ${this.name3}!`);
+    };
+    let obj2 = {
+      name3, // 直接写入变量name3，等价于 name3: name3
+      greet, // 直接写入函数greet，等价于 greet: greet
+    };
+    obj2.greet(); // 输出 "Hello, Alice!"
+    console.log(obj2);
+
+    const obj3 = {
+      name4: "Bob",
+      greet() {
+        // 直接写入函数greet，等价于 greet: function() {...}
+        console.log(`Hello, ${this.name4}!`);
+      },
+    };
+    obj3.greet(); // 输出 "Hello, Bob!"
+    console.log(obj3);
+
+    // =================== 箭头函数 ===================
+    // 箭头函数是ES6引入的一种简洁的函数定义方式
+    const add = (a, b) => a + b; // 简写形式，返回a+b。a和b是参数，=>是箭头，a+b是函数体
+    console.log(add(2, 3)); // 输出 5
+    const getName = () => "Alice"; // 无参数的箭头函数，返回"Alice"
+
+    // 1. 箭头函数没有自己的this，this的值继承自外层作用域
+    const obj4 = {
+      name: "Charlie",
+    };
+
+    function getName1() {
+      // 普通函数有自己的this，this指向调用函数的对象
+      console.log(this.name);
+    }
+    const getName2 = () => {
+      // 箭头函数没有自己的this，this的值继承自外层作用域
+      // 这里的this指向外层作用域，即全局作用域（window），由于window对象没有name属性，输出undefined
+      console.log(this.name);
+    };
+
+    // 使用call方法调用getName1，this指向obj4，故this.name输出"Charlie"
+    getName1.call(obj4);
+    // 使用call方法调用getName2，this指向外层作用域window，由于window对象没有name属性，输出undefined
+    getName2.call(obj4);
+
+    // 2. 箭头函数不能作为构造函数使用，不能使用new关键字调用
+    const Person = (name) => {
+      this.name = name;
+    };
+    // const p = new Person("Alice"); // 报错，箭头函数不能作为构造函数使用
+
+    // 3. 箭头函数不能使用arguments对象
+    const sum = () => {
+      console.log(arguments.length);
+    };
+    // sum(1, 2, 3); // 报错，箭头函数没有自己的arguments对象
+
+    // =================== ES6允许函数参数使用默认值 ===================
+    function add(a = 0, b = 0) {
+      return a + b;
+    }
+    console.log(add()); // 输出 0
+
+    // 与解构赋值类似，函数参数也可以使用对象解构赋值
+    function add({ a = 0, b = 0 }) {
+      return a + b;
+    }
+    console.log(add({ a: 5, b: 10 })); // 输出 15
+
+    // =================== ES6 引入rest 参数，用于获取函数的多余参数，这些参数被放入一个数组中 ===================
+    function sum(...args) {
+      // 注意：rest 参数必须是函数的最后一个参数，且只能有一个
+      // args是一个数组，包含所有传入的参数
+      // ES5zhong 使用arguments对象获取多余参数，但需注意arguments对象是一个类数组对象，不能使用数组方法。
+      return args.reduce((acc, curr) => acc + curr, 0);
+    }
+    console.log(sum(1, 2, 3)); // 输出 6
+
+    // =================== spread扩展 运算符 ===================
+    // spread扩展运算符可以将数组或对象展开为单独的元素
+    const arr3 = [1, 2, 3];
+    const arr4 = [...arr3, 4, 5]; // 将arr3展开为单独的元素，再加上4和5，组成新的数组
+    console.log(arr4); // 输出 [1, 2, 3, 4, 5]
+
+    // 1. 数组合并。本质上是将多个数组或对象展开为单独的元素，组成一个新的数组或对象
+    const arr5 = [1, 2, 3];
+    const arr6 = [4, 5, 6];
+    const arr7 = [...arr5, ...arr6]; // 将arr5和arr6展开为单独的元素，组成新的数组
+    console.log(arr7); // 输出 [1, 2, 3, 4, 5, 6]
+
+    // 2. 对象合并
+    const obj5 = { a: 1, b: 2 };
+    const obj6 = { c: 3, d: 4 };
+    const obj7 = { ...obj5, ...obj6 }; // 将obj5和obj6展开为单独的属性，组成新的对象
+    console.log(obj7); // 输出 { a: 1, b: 2, c: 3, d: 4 }
+  </script>
+</html>

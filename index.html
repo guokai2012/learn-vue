@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blank Document</title>
+  </head>
+  <body>
+    <div id="app">
+      <h1>{{ message }}</h1>
+      <p v-html="a1"></p>
+      <!-- v-show和v-if的区别：
+        v-show是通过css的display属性来控制显示和隐藏，（本质：改变元素的CSS display属性）
+        v-if是通过条件渲染来控制显示和隐藏。（本质：创建或移除元素）
+      -->
+      <p v-show="show ? true : false">显示v-show</p>
+      <p v-if="show ? false : true">显示v-if</p>
+      <p v-if="score >= 90">优秀</p>
+      <p v-else-if="score >= 80">良好</p>
+      <!-- 
+      由于v-if语句被分开，导致后半部分v-else-if语句失效 
+      <p title="60~70分">把v-if语句分开，导致后半部分v-else-if语句失效</p>
+      -->
+      <p v-else-if="score >=70">中等</p>
+      <p v-else-if="score >= 60">及格</p>
+      <p v-else>不及格</p>
+
+      <hr />
+
+      <!-- v-on:事件名="内联语句，即JS代码" -->
+      <button v-on:click="score = score + 10">加10分</button>
+      <button v-on:click="score = score - 10">减10分</button>
+
+      <!-- v-on:click可以简写为@click -->
+      <button @click="show = !show">切换显示</button>
+
+      <hr />
+
+      <p>当前分数：{{ score }}</p>
+      <!-- v-on:事件名="Vue中methods中定义的方法名称" -->
+      <button @click="addScore">加1分</button>
+      <button @click="reduceScore">减1分</button>
+
+      <hr />
+      <p>
+        当前剩余分数：{{ score }}。当前已兑换的礼物({{ items.length }})
+        <li v-for="(item, index) in items" :key="index">{{ item }}</li>
+      </p>
+      <button @click="buy(5, '可乐')">5分,兑换可乐</button>
+      <button @click="buy(10, '薯片')">10分,兑换薯片</button>
+      <button @click="items=[]">清空礼物</button>
+
+      <hr />
+      <!-- 【v-bind:属性名="表达式"】，动态设置html标签属性值，属性值可以是JS表达式 -->
+      <p v-bind:title="score >= 60 ? '及格' : '不及格'">title</p>
+      <!-- v-bind:属性名可以简写为【:属性名】 -->
+      <p :title="score >= 60 ? '及格' : '不及格'">title简写</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+    <script>
+      new Vue({
+        el: "#app",
+        data: {
+          message: "你好，世界！",
+          a1: "<a href='https://www.baidu.com' target='_blank'>百度</a>",
+          show: true,
+          score: 60,
+          items: [],
+        },
+        methods: {
+          // 这里可以定义一些方法
+          addScore() {
+            this.score++;
+          },
+          reduceScore() {
+            this.score--;
+          },
+          buy(points, item) {
+            if (this.score >= points) {
+              this.score -= points;
+              this.items.push(item);
+            } else {
+              alert("分数不足，无法兑换！");
+            }
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
