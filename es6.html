@@ -150,22 +150,22 @@
     // const p = new Person("Alice"); // 报错，箭头函数不能作为构造函数使用
 
     // 3. 箭头函数不能使用arguments对象
-    const sum = () => {
+    const sum1 = () => {
       console.log(arguments.length);
     };
-    // sum(1, 2, 3); // 报错，箭头函数没有自己的arguments对象
+    // sum1(1, 2, 3); // 报错，箭头函数没有自己的arguments对象
 
     // =================== ES6允许函数参数使用默认值 ===================
-    function add(a = 0, b = 0) {
+    function add1(a = 0, b = 0) {
       return a + b;
     }
-    console.log(add()); // 输出 0
+    console.log(add1()); // 输出 0
 
     // 与解构赋值类似，函数参数也可以使用对象解构赋值
-    function add({ a = 0, b = 0 }) {
+    function add2({ a = 0, b = 0 }) {
       return a + b;
     }
-    console.log(add({ a: 5, b: 10 })); // 输出 15
+    console.log(add2({ a: 5, b: 10 })); // 输出 15
 
     // =================== ES6 引入rest 参数，用于获取函数的多余参数，这些参数被放入一个数组中 ===================
     function sum(...args) {
@@ -193,5 +193,296 @@
     const obj6 = { c: 3, d: 4 };
     const obj7 = { ...obj5, ...obj6 }; // 将obj5和obj6展开为单独的属性，组成新的对象
     console.log(obj7); // 输出 { a: 1, b: 2, c: 3, d: 4 }
+
+    // ===================== 生成器函数 =======================
+    // 生成器函数是ES6引入的一种新的函数类型，使用function*定义，返回一个迭代器对象
+    function* generator() {
+      // 定义生成器函数
+      yield 1; // yield关键字用于暂停函数执行，并返回一个值
+      yield 2;
+      yield 3;
+    }
+    const iterator = generator();
+    console.log(iterator.next().value); // 输出 1
+    console.log(iterator.next()); // 输出 {value: 2, done: false}
+    console.log(iterator.next()); // 输出 {value: 3, done: false}
+    console.log(iterator.next()); // 输出 {value: undefined, done: true}，done为true表示迭代器已完成
+
+    // next('nextValue') 调用next()可以传参，该参数是下一个yield表达式的值
+    function* generator1(arg) {
+      console.log("arg=>", arg);
+      let nextValue = yield 1; // yield 表达式会暂停函数执行，并返回1，并等待下一次next()调用
+      console.log("yield1=>", nextValue);
+      let nextValue2 = yield 2;
+      console.log("yield2=>", nextValue2);
+      let nextValue3 = yield 3;
+      console.log("yield3=>", nextValue3);
+    }
+    // 创建迭代器，并传入参数 'AAA'，即 arg = 'AAA'
+    // 但是迭代器并未执行
+    let iterator1 = generator1("AAA");
+    iterator1.next(); // 调用next()方法，迭代器开始执行，并获取第一个yield表达式的值 1。故打印arg=> AAA
+    iterator1.next("BBB"); // 将参数 'BBB' 赋给 yield 1 的 nextValue，即 nextValue = 'BBB'
+    iterator1.next("CCC"); // 将参数 'CCC' 赋给 yield 2 的 nextValue，即 nextValue2 = 'CCC'
+    iterator1.next("DDD"); // 将参数 'DDD' 赋给 yield 3 的 nextValue，即 nextValue3 = 'DDD'
+
+    // 生成器函数实现异步编程
+    // 先获取用户数据，再根据用户id获取订单数据，在根据订单id获取商品数据
+    function* getData(userName) {
+      let userData = yield getUserData(userName);
+      let orderData = yield getOrderData(userData.id);
+      let productData = yield getProductData(orderData.productId);
+
+      console.log(
+        "用户[" +
+          userData.name +
+          "]的订单[ID:" +
+          orderData.id +
+          "]的商品是[" +
+          productData.name +
+          "]",
+      );
+    }
+
+    let iteratorData = getData("Bob");
+    iteratorData.next();
+
+    // 获取用户数据
+    function getUserData(userName) {
+      setTimeout(() => {
+        let users = [
+          { id: 1, name: "Alice" },
+          { id: 2, name: "Bob" },
+          { id: 3, name: "Tom" },
+        ];
+        console.log(userName);
+        let userData = users.filter((user) => user.name == userName);
+        if (userData.length > 0) {
+          iteratorData.next(userData[0]);
+        } else {
+          iteratorData.throw("用户不存在");
+        }
+      }, 1000);
+    }
+
+    // 获取订单数据
+    function getOrderData(userId) {
+      setTimeout(() => {
+        let orders = [
+          { id: 1, userId: 1, productId: 1 },
+          { id: 2, userId: 2, productId: 2 },
+          { id: 3, userId: 3, productId: 3 },
+        ];
+        let orderData = orders.filter((order) => order.userId === userId);
+        if (orderData.length > 0) {
+          iteratorData.next(orderData[0]);
+        } else {
+          iteratorData.throw("订单不存在");
+        }
+      }, 1000);
+    }
+
+    // 获取产品数据
+    function getProductData(productId) {
+      setTimeout(() => {
+        let products = [
+          { id: 1, name: "手机" },
+          { id: 2, name: "电脑" },
+          { id: 3, name: "电脑键盘" },
+        ];
+        let productData = products.filter(
+          (product) => product.id === productId,
+        );
+        if (productData.length > 0) {
+          iteratorData.next(productData[0]);
+        } else {
+          iteratorData.throw("商品不存在");
+        }
+      }, 1000);
+    }
+
+    // =================== Promise ===================
+    // Promise是ES6引入的一种异步编程解决方案，表示一个异步操作的最终完成（或失败）及其结果值。
+    // Promise有三种状态：pending（进行中）、fulfilled（已成功）、rejected（已失败）。
+    // Promise对象的状态只能从pending变为fulfilled或rejected，且一旦状态改变就不会再变。
+
+    // 创建Promise对象
+    const promise = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve("成功");
+      }, 1000);
+    });
+    promise.then(
+      (value) => {
+        // 当promise状态为fulfilled时，会执行此回调函数
+        console.log(value); // 输出 "成功"
+      },
+      (reason) => {
+        // 当promise状态为rejected时，会执行此回调函数
+        console.log(reason); // 不会执行
+      },
+    );
+    promise.then((value) => {
+      // 可以只写fulfilled的回调函数
+      console.log(value); // 输出 "成功"
+    });
+
+    // Promise.all()方法用于将多个Promise实例包装成一个新的Promise实例
+    const promise1 = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve("成功1");
+      }, 1000);
+    });
+    const promise2 = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve("成功2");
+      }, 1000);
+    });
+    const promise3 = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve("成功3");
+      }, 1000);
+    });
+    Promise.all([promise1, promise2, promise3]).then((values) => {
+      console.log(values); // 输出 ["成功1", "成功2", "成功3"]
+    });
+
+    // Promise的链式调用
+    const promise4 = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve("成功4");
+      }, 1000);
+    });
+    promise4
+      .then((value) => {
+        console.log(value); // 输出 "成功4"
+        return "成功5"; // 返回一个新的值，传递给下一个then的回调函数
+      })
+      .then((value) => {
+        console.log(value); // 输出 "成功5"
+      });
+    // Promise的catch()方法用于指定Promise对象失败的回调函数
+    const promise5 = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        reject("失败");
+      }, 1000);
+    });
+    promise5.catch((reason) => {
+      console.log(reason); // 输出 "失败"
+    });
+
+    // Promise的finally()方法用于指定不管Promise对象最后状态如何，都会执行的操作
+    const promise6 = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve("成功6");
+      }, 1000);
+    });
+    promise6
+      .then((value) => {
+        // fulfilled状态的回调函数
+        console.log(value); // 输出 "成功6"
+      })
+      .catch((reason) => {
+        // rejected状态的回调函数
+        console.log(reason); // 输出 "失败"
+      })
+      .finally(() => {
+        // 无论Promise对象最后状态如何，都会执行的回调函数
+        console.log("无论Promise对象最后状态如何，都会执行"); // 输出 "无论Promise对象最后状态如何，都会执行"
+      });
+
+    //===================== set和 map ==========================
+    // set 是 ES6 提供的集合数据结构，用来存储唯一值
+    let set = new Set([1, 2, 3, 4, 4]);
+    console.log(set); // 输出 Set(4) {1, 2, 3, 4}，重复的值会被自动去重
+    set.add(5); // 添加新值
+    console.log(set); // 输出 Set(5) {1, 2, 3, 4, 5}
+    set.delete(3); // 删除指定值
+    console.log(set); // 输出 Set(4) {1, 2, 4, 5}
+    console.log(set.has(4)); // 判断是否存在指定值，输出 true
+    set.clear(); // 清空集合
+    console.log(set);
+
+    // map 是 ES6 提供的键值对数据结构，用来存储键值对数据
+    let map = new Map();
+    map.set("name", "张三"); // 添加键值对
+    map.set("age", 18); // 添加键值对
+    console.log(map); // 输出 Map(2) {name: "张三", age: 18}
+    console.log(map.get("name")); // 获取指定键的值，输出 "张三"
+    console.log(map.has("age")); // 判断是否存在指定键，输出 true
+    map.delete("name"); // 删除指定键值对
+    console.log(map); // 输出 Map(1) {age: 18}
+    map.clear(); // 清空map
+
+    // ====================== 类 ==========================
+    // ES6 引入了类的概念，使用 class 关键字定义类
+
+    // ES5 定义类的方式
+    function Person1(name, age) {
+      this.name = name;
+      this.age = age;
+    }
+    Person1.prototype.sayHello = function () {
+      console.log(
+        `Hello, my name is ${this.name} and I am ${this.age} years old.`,
+      );
+    };
+    let person1 = new Person1("张三", 18);
+    person1.sayHello(); // 输出 "Hello, my name is 张三 and I am 18 years old."
+
+    // ES6 定义类的方式
+    class Person2 {
+      // 构造函数, constructor固定写法
+      constructor(name, age) {
+        this.name = name;
+        this.age = age;
+      }
+      // 方法，不能添加function关键字，与ES5的对象方法不同
+      sayHello() {
+        console.log(
+          `Hello, my name is ${this.name} and I am ${this.age} years old.`,
+        );
+      }
+    }
+    let person2 = new Person2("张三", 18);
+    person2.sayHello(); // 输出 "Hello, my name is 张三 and I am 18 years old."
+
+    // 继承
+    class Person3 extends Person2 {
+      // 子类构造函数，必须调用super方法，否则会报错
+      constructor(name, age, job) {
+        super(name, age); // 调用父类的构造函数
+        this.job = job;
+      }
+      // 子类方法
+      sayJob() {
+        console.log(`I am a ${this.job}.`);
+      }
+    }
+
+    // 静态成员
+    class Person4 {
+      static staticProperty = "This is a static property.";
+      static staticMethod() {
+        console.log("This is a static method.");
+      }
+    }
+    console.log(Person4.staticProperty); // 输出 "This is a static property."
+    console.log(new Person4().staticProperty); // 输出 "undefined"，因为静态属性不能通过实例访问
+
+    // 子类对父类方法的重写
+    class Person5 extends Person2 {
+      constructor(name, age) {
+        super(name, age);
+      }
+      sayHello() {
+        super.sayHello(); // 调用父类的方法
+        console.log(
+          `Hello, my name is ${this.name} and I am ${this.age} years old.`,
+        );
+      }
+    }
+    let person5 = new Person5("张三", 18);
+    person5.sayHello(); // 输出 "Hello, my name is 张三 and I am 18 years old."
   </script>
 </html>
